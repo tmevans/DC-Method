@@ -1,0 +1,56 @@
+I have gone through these steps to make sure they work and to provide an example on g2 at /home/tevans/data/DC_test (MTM: Now within this directory).
+
+Getting set up:
+-core.py and mpfit.py must be in either the python package directory or in the same directory where you are working.
+-I typically structure directories J2000_NAME-> slitshift or  telescope_shifts -> instrument (hires/uves) (e.g. /home/tevans/data/J155152+191104/slitshifts/hires)
+- Within the directory that you want to use the DC method (in my case hires/uves/hds) create an "exposures" directory and an output directory.
+-place DC_method_template.py, feat_select.py, Fit_stats.py, SpecPlot_390.py and DC_390.bash into your working directory.
+-You may wish to change the names in your specific case.  This example deals with the 390 setting on UVES hence the 390 designation.
+
+
+Setting up DC runs:
+-For most runs you will not need to tweak the DC_method_template.py file.  Most of commands you will want are in the .bash script that you will run.
+-DC_method_template.py does contain the ability to change the chi^2 stepping and stopping criteria, the path to the telluric masking, how much buffer to add around `chunks',  the ability to mask extra regions of spectrum, and the ability to overlap chunks.  These are all currently set to defaults that I rarely change.  But you can if you want to.
+
+-The majority of the setup you will need to do is in the .bash script.
+-Modify the bash script for the values relevant to your run up to "#End of user input"
+-All of the needed information is explained and carefully commented in the bash file.
+
+
+Running:
+-Run the .bash script to create all of your individual DC method runs.  They will be named with the DC_"exposure_name".py (e.g. DC_390_1.py)
+-Run all of the python scripts.  Each one will produce a file in output.
+-You can submit them to the super computer to do or just run them all however you best see fit.  Sometimes I will just run some in different "screens".
+-When complete, each program will write out the results in an ascii table that can be found in output/DC_name.dat (e.g. output/DC_390_1.dat)
+
+
+Selecting useful results:
+-Use this to make the "sigma cut" for which chunks contain meaningful measurements of velocity shift.
+-Open feat_select.py
+-All parameters you might want to change are above "#End of user input"
+-This includes listing which files you want to cut (many can be done at a time by including an * in the path name), the sigma level of the cut (how much smaller the error bars of selected points must be than lisk et al errors), you may select regions of spectrum in which you will not select any points even if they meat the sigma-cut, and you may opt to set a wavelength over which to apply the selection criteria.
+-Run feat_select.py
+-This will output an ascii file similar to the output of DC method but with only the selected chunks that were selected included.
+-This file will be in the output directory and will be named DC_"exsposure_name"_feat.dat (e.g. output/DC_390_1_feat.dat).
+
+
+Viewing DC output for a single pair of spectra:
+-This step is useful for determining what the correct level of sigma-cut is.  Recall that a higher value of the sigma-cut will result in fewer chunks being selected.
+-Open SpecPlot_name.py
+-Change parameters as desired up to "#End of user input".
+-You may specify weighting of a linear regression, level of sigma-cut to be viewed in plot (generally make it the same as the value used in feat_select.py), starting wavelength, ending wavelength, and the path to the files for the individual plot (explained in the comments of SpecPlot.py)
+-Run SpecPlot.py to see your figure.
+
+
+Determining slope and statistics for DC method results
+-Open Fit_stats.py
+-Change parameters above "#End of user input".
+-Tunable parameters include weighting the linear regression, increasing the uncertainty values until chi^2 per degree of freedom until it is <= 1 and how close to 1 you want it to be.
+-Also must include the file(s) for which you want the statistics.
+-Run Fit_stats.py
+-This will produce a file within your working directory called "stats.dat"
+-stats.dat is an ascii table that includes the results including the slope of a linear regression through the chunks and uncertainty, and the average velocity offset of the chunks and uncertainty, as well as some additional information.
+-units for slope are km/s /A.  units for offset are km/s.
+
+
+
